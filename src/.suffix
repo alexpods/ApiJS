@@ -1,3 +1,4 @@
+    Api.Manager = Manager;
 
     global.Api = Api;
 

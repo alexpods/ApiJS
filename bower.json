@@ -1,0 +1,14 @@
+{
+    "name": "ApiJS",
+    "version": "0.0.0",
+    "ignore": [
+        "node_modules",
+        "Gruntfile.js",
+        "package.json",
+        "bower.json"
+    ],
+    "dependencies": {
+        "jquery":    "git://github.com/jquery/jquery.git",
+        "Q":         "git://github.com/kriskowal/q.git"
+    }
+}
