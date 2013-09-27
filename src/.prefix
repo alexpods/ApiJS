@@ -1,2 +1,4 @@
-;(function(global, undefined) {
+;(function(global, Meta, Q, jQuery, undefined) {
+
+NameSpace('ApiJS');
 

@@ -8,6 +8,7 @@
         "bower.json"
     ],
     "dependencies": {
+        "MetaJS":    "~0.1.1",
         "jquery":    "git://github.com/jquery/jquery.git",
         "Q":         "git://github.com/kriskowal/q.git"
     }

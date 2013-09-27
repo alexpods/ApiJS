@@ -1,5 +1,4 @@
-    Api.Manager = Manager;
 
-    global.Api = Api;
+NameSpace.end();
 
-})(this);
+})(this, Meta, Q, jQuery);
