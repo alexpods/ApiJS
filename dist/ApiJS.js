@@ -17,9 +17,7 @@ Clazz('Api', function(Manager, Factory) {
 
                     if (!name) {
                         service  = Factory.create(meta);
-                        name = service.getName();
-
-                        Manager.setApi(name, api)
+                        Manager.setService(service.getName(), service)
                     }
 
                     return Manager.get(name);
@@ -34,7 +32,7 @@ Clazz('Api', function(Manager, Factory) {
 Clazz('Manager', function(Factory) {
     return {
         properties: {
-            api: {
+            service: {
                 type: 'hash',
                 methods: ['get', 'set', 'has']
             },
@@ -45,17 +43,21 @@ Clazz('Manager', function(Factory) {
         },
         methods: {
             get: function(name) {
-                if (!this.hasApi(name)) {
-                    this.setApi(name, Factory.create(this.getMeta(name)));
+                if (!this.hasService(name)) {
+                    var service = Factory.create(name, this.getMeta(name))
+                    this.setService(service.getName(), service);
                 }
-                return this.getApi(name);
+                return this.getService(name);
             },
             has: function(name) {
-                return this.hasApi(name) || this.hasMeta(name);
+                return this.hasService(name) || this.hasMeta(name);
             }
         }
     }
 });
+/**
+ *
+ */
 Clazz('Factory', function(Service, Meta, MetaOptions) {
     return {
         constants: {
@@ -109,9 +111,7 @@ Clazz('Service', function(Action) {
             processors: {
                 type: ['hash', {
                     keys: ['pre', 'success', 'fail', 'post'],
-                    element: {
-                        type: 'array'
-                    }
+                    element: 'array'
                 }],
                 methods: ['get', 'set', 'has']
             },
@@ -131,11 +131,11 @@ Clazz('Service', function(Action) {
                 return this._extend(
                     {},
                     this.getOptions() || {},
-                    this.getAction(name).options || {}
+                    this.getActions(name).options || {}
                 );
             },
             getActionProcessors: function(name) {
-                var type, processors = this._extend({}, this.getProcessors() || {}), aProcessors = this.getAction(name).processors;
+                var type, processors = this._extend({}, this.getProcessors() || {}), aProcessors = this.getActions(name).processors;
 
                 for (type in aProcessors) {
                     if (!processors[type]) {
@@ -188,16 +188,14 @@ Clazz('Action', function(Q, jQuery) {
         properties: {
             options: {
                 type: 'hash',
-                methods: ['get', 'set', 'has', 'add']
+                methods: ['get', 'set', 'has']
             },
             processors: {
                 type: ['array', {
                     keys: ['pre', 'success', 'fail', 'post'],
-                    element: {
-                        type: 'array'
-                    }
+                    element: 'array'
                 }],
-                methods: ['get', 'set', 'has', 'add']
+                methods: ['get', 'set', 'has']
             }
         },
         methods: {
@@ -250,7 +248,7 @@ Clazz('Actions', function() {
                 ('processors' === option ? processors : options)[option] = actions[action][option];
             }
 
-            service.setAction(action, {
+            service.setActions(action, {
                 options:    options,
                 processors: processors
             });
