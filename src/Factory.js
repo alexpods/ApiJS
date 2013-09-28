@@ -1,3 +1,6 @@
+/**
+ *
+ */
 Clazz('Factory', function(Service, Meta, MetaOptions) {
     return {
         constants: {

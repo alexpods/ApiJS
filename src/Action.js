@@ -3,16 +3,14 @@ Clazz('Action', function(Q, jQuery) {
         properties: {
             options: {
                 type: 'hash',
-                methods: ['get', 'set', 'has', 'add']
+                methods: ['get', 'set', 'has']
             },
             processors: {
                 type: ['array', {
                     keys: ['pre', 'success', 'fail', 'post'],
-                    element: {
-                        type: 'array'
-                    }
+                    element: 'array'
                 }],
-                methods: ['get', 'set', 'has', 'add']
+                methods: ['get', 'set', 'has']
             }
         },
         methods: {

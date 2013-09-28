@@ -1,7 +1,7 @@
 Clazz('Manager', function(Factory) {
     return {
         properties: {
-            api: {
+            service: {
                 type: 'hash',
                 methods: ['get', 'set', 'has']
             },
@@ -12,13 +12,14 @@ Clazz('Manager', function(Factory) {
         },
         methods: {
             get: function(name) {
-                if (!this.hasApi(name)) {
-                    this.setApi(name, Factory.create(this.getMeta(name)));
+                if (!this.hasService(name)) {
+                    var service = Factory.create(name, this.getMeta(name))
+                    this.setService(service.getName(), service);
                 }
-                return this.getApi(name);
+                return this.getService(name);
             },
             has: function(name) {
-                return this.hasApi(name) || this.hasMeta(name);
+                return this.hasService(name) || this.hasMeta(name);
             }
         }
     }

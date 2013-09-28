@@ -10,7 +10,7 @@ Clazz('Actions', function() {
                 ('processors' === option ? processors : options)[option] = actions[action][option];
             }
 
-            service.setAction(action, {
+            service.setActions(action, {
                 options:    options,
                 processors: processors
             });

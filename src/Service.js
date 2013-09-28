@@ -12,9 +12,7 @@ Clazz('Service', function(Action) {
             processors: {
                 type: ['hash', {
                     keys: ['pre', 'success', 'fail', 'post'],
-                    element: {
-                        type: 'array'
-                    }
+                    element: 'array'
                 }],
                 methods: ['get', 'set', 'has']
             },
@@ -34,11 +32,11 @@ Clazz('Service', function(Action) {
                 return this._extend(
                     {},
                     this.getOptions() || {},
-                    this.getAction(name).options || {}
+                    this.getActions(name).options || {}
                 );
             },
             getActionProcessors: function(name) {
-                var type, processors = this._extend({}, this.getProcessors() || {}), aProcessors = this.getAction(name).processors;
+                var type, processors = this._extend({}, this.getProcessors() || {}), aProcessors = this.getActions(name).processors;
 
                 for (type in aProcessors) {
                     if (!processors[type]) {

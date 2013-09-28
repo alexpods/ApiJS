@@ -12,9 +12,7 @@ Clazz('Api', function(Manager, Factory) {
 
                     if (!name) {
                         service  = Factory.create(meta);
-                        name = service.getName();
-
-                        Manager.setApi(name, api)
+                        Manager.setService(service.getName(), service)
                     }
 
                     return Manager.get(name);
