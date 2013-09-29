@@ -3,45 +3,29 @@
 NameSpace('ApiJS');
 
 
-Clazz('Api', function(Manager, Factory) {
-    return {
-        methods: {
-            init: function(name, meta) {
-                var service;
-
-                if (typeof meta === 'undefined') {
-                    if (Object.prototype.toString.apply(name) === '[object Object]') {
-                        meta = name;
-                        name = null;
-                    }
-
-                    if (!name) {
-                        service  = Factory.create(meta);
-                        Manager.setService(service.getName(), service)
-                    }
-
-                    return Manager.get(name);
-                }
-                else {
-                    Manager.setMeta(name, meta);
-                }
-            }
-        }
-    }
-});
-Clazz('Manager', function(Factory) {
+Clazz('Api', function(Factory) {
     return {
         properties: {
-            service: {
-                type: 'hash',
-                methods: ['get', 'set', 'has']
-            },
-            meta: {
-                type: 'hash',
-                methods: ['get', 'set', 'has']
+            properties: {
+                service: {
+                    type: 'hash',
+                    methods: ['get', 'set', 'has']
+                },
+                meta: {
+                    type: 'hash',
+                    methods: ['get', 'set', 'has']
+                }
             }
         },
         methods: {
+            service: function(name, meta) {
+                if (typeof meta === 'undefined') {
+                    return this.get(name);
+                }
+
+                this.setMeta(name, meta);
+                return this;
+            },
             get: function(name) {
                 if (!this.hasService(name)) {
                     var service = Factory.create(name, this.getMeta(name))
@@ -55,9 +39,6 @@ Clazz('Manager', function(Factory) {
         }
     }
 });
-/**
- *
- */
 Clazz('Factory', function(Service, Meta, MetaOptions) {
     return {
         constants: {
@@ -82,7 +63,7 @@ Clazz('Factory', function(Service, Meta, MetaOptions) {
                     name = this.generateName();
                 }
 
-                var service = new Service({ name: name });
+                var service = Service.create({ name: name });
 
                 if (typeof meta === 'function') {
                     meta = meta.apply(service);
@@ -122,7 +103,7 @@ Clazz('Service', function(Action) {
         },
         methods: {
             action: function(name) {
-                return new Action({
+                return Action.create({
                     options:    this.getActionOptions(name),
                     processors: this.getActionProcessors(name)
                 });
@@ -291,8 +272,7 @@ NameSpace.end();
             processors: Clazz('MetaProcessors.Processors').create(),
             actions:    Clazz('MetaProcessors.Actions').create()
         }]).create(),
-        Manager = Clazz('Manager', [ Factory ]).create(),
-        Api     = Clazz('Manager', [ Manager, Factory ]).create();
+        Api = Clazz('Api', [ Factory ]).create();
     ;
 
     global.Api = Api;

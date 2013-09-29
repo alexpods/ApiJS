@@ -1,6 +1,3 @@
-/**
- *
- */
 Clazz('Factory', function(Service, Meta, MetaOptions) {
     return {
         constants: {
@@ -25,7 +22,7 @@ Clazz('Factory', function(Service, Meta, MetaOptions) {
                     name = this.generateName();
                 }
 
-                var service = new Service({ name: name });
+                var service = Service.create({ name: name });
 
                 if (typeof meta === 'function') {
                     meta = meta.apply(service);

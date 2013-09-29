@@ -23,7 +23,7 @@ Clazz('Service', function(Action) {
         },
         methods: {
             action: function(name) {
-                return new Action({
+                return Action.create({
                     options:    this.getActionOptions(name),
                     processors: this.getActionProcessors(name)
                 });
