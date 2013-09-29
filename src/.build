@@ -1,15 +1,15 @@
 ;(function(global, Meta, Q, jQuery) {
 
     var
-        Action  = Clazz('Action', Q, jQuery).create(),
-        Service = Clazz('Service', Action).create(),
-        Factory = Clazz('Factory', Service, Meta, {
+        Action  = Clazz('Action',  [ Q, jQuery ]).create(),
+        Service = Clazz('Service', [ Action ]).create(),
+        Factory = Clazz('Factory', [ Service , Meta, {
             options:    Clazz('MetaProcessors.Options').create(),
             processors: Clazz('MetaProcessors.Processors').create(),
             actions:    Clazz('MetaProcessors.Actions').create()
-        }).create(),
-        Manager = Clazz('Manager', Factory).create(),
-        Api     = Clazz('Manager', Manager, Factory).create();
+        }]).create(),
+        Manager = Clazz('Manager', [ Factory ]).create(),
+        Api     = Clazz('Manager', [ Manager, Factory ]).create();
     ;
 
     global.Api = Api;
