@@ -273,9 +273,10 @@ NameSpace.end();
 ;(function(global, Meta, Q, jQuery) {
 
     var
-        Action  = Clazz('Action',  [ Q, jQuery ]).create(),
-        Service = Clazz('Service', [ Action ]).create(),
-        Factory = Clazz('Factory', [ Service , Meta, {
+        ActionClazz  = Clazz('Action',  [ Q, jQuery ]),
+        ServiceClazz = Clazz('Service', [ ActionClazz ]),
+
+        Factory = Clazz('Factory', [ ServiceClazz , Meta, {
             options:    Clazz('MetaProcessors.Options').create(),
             processors: Clazz('MetaProcessors.Processors').create(),
             actions:    Clazz('MetaProcessors.Actions').create()
