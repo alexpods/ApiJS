@@ -1,19 +1,23 @@
 Clazz('Actions', function() {
 
-    return function(service, actions) {
-        for (var action in actions) {
+    return {
+        methods: {
+            process: function(service, actions) {
+                for (var action in actions) {
 
-            var options    = {};
-            var processors = {};
+                    var options    = {};
+                    var processors = {};
 
-            for (var option in actions[action]) {
-                ('processors' === option ? processors : options)[option] = actions[action][option];
+                    for (var option in actions[action]) {
+                        ('processors' === option ? processors : options)[option] = actions[action][option];
+                    }
+
+                    service.setActions(action, {
+                        options:    options,
+                        processors: processors
+                    });
+                }
             }
-
-            service.setActions(action, {
-                options:    options,
-                processors: processors
-            });
         }
     }
 });

@@ -1,6 +1,9 @@
 Clazz('Processors', function() {
-
-    return function(service, processors) {
-        service.setProcessors(processors);
+    return {
+        methods: {
+            process: function(service, processors) {
+                service.setProcessors(processors);
+            }
+        }
     }
 });

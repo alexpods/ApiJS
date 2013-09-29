@@ -1,6 +1,9 @@
 Clazz('Options', function() {
-
-    return function(service, options) {
-        service.setOptions(options);
+    return {
+        methods: {
+            process: function(service, options) {
+                service.setOptions(options);
+            }
+        }
     }
 });

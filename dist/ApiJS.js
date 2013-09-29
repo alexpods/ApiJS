@@ -238,33 +238,43 @@ NameSpace('ApiJS.MetaProcessors');
 
 Clazz('Actions', function() {
 
-    return function(service, actions) {
-        for (var action in actions) {
+    return {
+        methods: {
+            process: function(service, actions) {
+                for (var action in actions) {
 
-            var options    = {};
-            var processors = {};
+                    var options    = {};
+                    var processors = {};
 
-            for (var option in actions[action]) {
-                ('processors' === option ? processors : options)[option] = actions[action][option];
+                    for (var option in actions[action]) {
+                        ('processors' === option ? processors : options)[option] = actions[action][option];
+                    }
+
+                    service.setActions(action, {
+                        options:    options,
+                        processors: processors
+                    });
+                }
             }
-
-            service.setActions(action, {
-                options:    options,
-                processors: processors
-            });
         }
     }
 });
 Clazz('Options', function() {
-
-    return function(service, options) {
-        service.setOptions(options);
+    return {
+        methods: {
+            process: function(service, options) {
+                service.setOptions(options);
+            }
+        }
     }
 });
 Clazz('Processors', function() {
-
-    return function(service, processors) {
-        service.setProcessors(processors);
+    return {
+        methods: {
+            process: function(service, processors) {
+                service.setProcessors(processors);
+            }
+        }
     }
 });
 
@@ -277,9 +287,9 @@ NameSpace.end();
         ServiceClazz = Clazz('Service', [ ActionClazz ]),
 
         Factory = Clazz('Factory', [ ServiceClazz , Meta, {
-            options:    Clazz('MetaProcessors.Options').create(),
-            processors: Clazz('MetaProcessors.Processors').create(),
-            actions:    Clazz('MetaProcessors.Actions').create()
+            options:    Clazz('MetaProcessors.Options'),
+            processors: Clazz('MetaProcessors.Processors'),
+            actions:    Clazz('MetaProcessors.Actions')
         }]).create(),
         Manager = Clazz('Manager', [ Factory ]).create(),
         Api     = Clazz('Manager', [ Manager, Factory ]).create();
