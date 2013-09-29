@@ -6,15 +6,13 @@ NameSpace('ApiJS');
 Clazz('Api', function(Factory) {
     return {
         properties: {
-            properties: {
-                service: {
-                    type: 'hash',
-                    methods: ['get', 'set', 'has']
-                },
-                meta: {
-                    type: 'hash',
-                    methods: ['get', 'set', 'has']
-                }
+            service: {
+                type: 'hash',
+                methods: ['get', 'set', 'has']
+            },
+            meta: {
+                type: 'hash',
+                methods: ['get', 'set', 'has']
             }
         },
         methods: {
