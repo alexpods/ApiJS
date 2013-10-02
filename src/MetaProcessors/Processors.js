@@ -1,9 +1,5 @@
-Clazz('Processors', function() {
-    return {
-        methods: {
-            process: function(service, processors) {
-                service.setProcessors(processors);
-            }
-        }
+Meta.Manager.setProcessor('Processors', function(object, processors) {
+    for (var type in processors) {
+        object.setProcessor(type, processors[type]);
     }
-});
+})

@@ -3,194 +3,89 @@
 NameSpace('ApiJS');
 
 
-Clazz('Api', function(Factory) {
+Clazz('ApiJS.Api', function() {
     return {
         properties: {
-            service: {
-                type: 'hash',
-                methods: ['get', 'set', 'has']
-            },
-            meta: {
-                type: 'hash',
-                methods: ['get', 'set', 'has']
-            }
+            factory: ['object'],
+            service: ['hash']
         },
         methods: {
             service: function(name, meta) {
-                if (typeof meta === 'undefined') {
-                    return this.get(name);
-                }
+                if (typeof meta === 'undefined' || Object.prototype.toString.call(meta) === '[object Array]') {
 
-                this.setMeta(name, meta);
-                return this;
-            },
-            get: function(name) {
-                if (!this.hasService(name)) {
-                    var service = Factory.create(name, this.getMeta(name))
-                    this.setService(service.getName(), service);
+                    if (!this.hasService(name)) {
+                        this.setService(name, Service.create({
+                            api: this
+                        }));
+                    }
+                    return this.getService(name);
                 }
-                return this.getService(name);
-            },
-            has: function(name) {
-                return this.hasService(name) || this.hasMeta(name);
+                this.getFactory().setServiceClazz(name, meta);
+                return this;
             }
         }
     }
-});
-Clazz('Factory', function(Service, Meta, MetaOptions) {
+})
+Clazz('ApiJS.Factory', function(Meta) {
     return {
-        constants: {
-            NAME_PATTERN: 'Api{UID}'
-        },
         properties: {
-            uid: {
-                default: 0
-            },
-            meta: {
-                default: new Meta(MetaOptions),
-                methods: ['get']
-            }
+            serviceClazz: ['object'],
+            actionClazz:  ['object']
         },
         methods: {
-            create: function(name, meta) {
-                if (typeof meta === 'undefined') {
-                    meta = name;
-                    name = null;
-                }
-                if (!name) {
-                    name = this.generateName();
-                }
-
-                var service = Service.create({ name: name });
-
-                if (typeof meta === 'function') {
-                    meta = meta.apply(service);
-                }
-                this._meta.process(service, meta);
-
-                return service;
+            createService: function(name, meta) {
+                return Meta.Manager.getHandler('ApiJS.Service').process(this.getServiceClazz({ name: name }).create(), meta);
             },
-            generateName: function() {
-                return this.clazz.const('NAME_PATTERN').replace('{UID}', ++this._uid);
+            createAction: function(name, meta) {
+                return Meta.Manager.getHandler('ApiJS.Action').process(this.getActionClazz().create({ name: name}), meta);
             }
         }
     }
-});
-Clazz('Service', function(Action) {
+})
+Clazz('ApiJS.Service', function() {
     return {
         properties: {
-            name: {
-                type: 'string',
-                methods: 'get'
-            },
-            options: {
-                type: 'hash',
-                methods: ['get', 'set', 'has']
-            },
-            processors: {
-                type: ['hash', {
-                    keys: ['pre', 'success', 'fail', 'post'],
-                    element: 'array'
-                }],
-                methods: ['get', 'set', 'has']
-            },
-            actions: {
-                type: 'hash',
-                methods: ['get', 'set', 'has']
-            }
+            api:        ['object'],
+            name:       ['string'],
+            baseUrl:    ['string'],
+            header:     ['hash'],
+            data:       ['hash'],
+            param:      ['hash'],
+            option:     ['hash'],
+            processors: ['hash', { keys: ['pre', 'success', 'fail', 'post']}],
+            actionMeta: ['hash']
         },
         methods: {
             action: function(name) {
-                return Action.create({
-                    options:    this.getActionOptions(name),
-                    processors: this.getActionProcessors(name)
-                });
-            },
-            getActionOptions: function(name) {
-                return this._extend(
-                    {},
-                    this.getOptions() || {},
-                    this.getActions(name).options || {}
-                );
-            },
-            getActionProcessors: function(name) {
-                var type, processors = this._extend({}, this.getProcessors() || {}), aProcessors = this.getActions(name).processors;
-
-                for (type in aProcessors) {
-                    if (!processors[type]) {
-                        processors[type] = [];
-                    }
-                    Array.prototype.push.apply(processors[type], aProcessors[type]);
-                }
-                return processors;
-            },
-            _extend: function(object) {
-                for (var i = 1, ii = arguments.length; i < ii; ++i) {
-                    for (var property in arguments[i]) {
-                        object[property] = this._copy(arguments[i][property]);
-                    }
-                }
-                return object;
-            },
-            _copy: function(object) {
-                var copy, toString = Object.prototype.toString.apply(object);
-
-                if (typeof object !== 'object') {
-                    copy = object;
-                }
-                else if ('[object Date]' === toString) {
-                    copy = new Date(object.getTime())
-                }
-                else if ('[object Array]' === toString) {
-                    copy = [];
-                    for (var i = 0, ii = object.length; i < ii; ++i) {
-                        copy[i] = this._copy(object[i]);
-                    }
-                }
-                else if ('[object RegExp]' === toString) {
-                    copy = new RegExp(object.source);
-                }
-                else {
-                    copy = {}
-                    for (var property in object) {
-                        copy[property] = this._copy(object[property]);
-                    }
-                }
-
-                return copy;
+                return this.getApi().getFactory().createAction(name, this.getActionMeta(name)).setService(this);
             }
         }
     }
-});
-Clazz('Action', function(Q, jQuery) {
+})
+Clazz('ApiJS.Action', function(Q, jQuery) {
     return {
         properties: {
-            options: {
-                type: 'hash',
-                methods: ['get', 'set', 'has']
-            },
-            processors: {
-                type: ['array', {
-                    keys: ['pre', 'success', 'fail', 'post'],
-                    element: 'array'
-                }],
-                methods: ['get', 'set', 'has']
-            }
+            name:       ['string'],
+            service:    ['object'],
+            path:       ['string'],
+            method:     ['string', 'GET', { pattern: /^(GET|POST|PUT|DELETE|PATCH)$/ }],
+            header:     ['hash'],
+            data:       ['hash'],
+            param:      ['hash'],
+            option:     ['hash'],
+            processors: ['hash', { keys: ['pre', 'success', 'fail', 'post'] }]
         },
         methods: {
-            query: function(options) {
+            query: function() {
                 var self = this;
-
-                if (typeof options !==  'undefined') {
-                    self.addOptions(options);
-                }
 
                 return Q.when()
                     .then(function() {
                         return self.process('pre');
                     })
                     .then(function() {
-                        return Q.when(jQuery.ajax(self.getOptions()));
+                        self.checkRequest();
+                        return Q.when(jQuery.ajax(self.getAjaxOptions()));
                     })
                     .then(function() {
                         return self.process('success');
@@ -202,77 +97,210 @@ Clazz('Action', function(Q, jQuery) {
                         return self.process('post');
                     })
             },
-
             process: function(type) {
-                if (!this.hasProcessors(type)) {
+                if (!this.hasAllProcessors(type)) {
                     return;
                 }
-                return Q.all(this.getProcessors(type));
-            }
-        }
-    }
-});
+                var i, ii, values = [], processors = this.getAllProcessors(type);
 
-NameSpace('ApiJS.MetaProcessors');
+                for (i = 0, ii = processors.length; i < ii; ++i) {
+                    values.push(processors[i].call(this));
+                }
+                return Q.all(values);
+            },
 
-Clazz('Actions', function() {
+            getAllHeader: function(name) {
+                var h, header = {}, actionHeader = this.getHeader(), serviceHeader = this.getService().getHeader();
 
-    return {
-        methods: {
-            process: function(service, actions) {
-                for (var action in actions) {
+                for (h in actionHeader) {
+                    header[h] = actionHeader[h];
+                }
+                for (h in serviceHeader) {
+                    header[h] = serviceHeader[h];
+                }
 
-                    var options    = {};
-                    var processors = {};
+                return typeof name !== 'undefined' ? header[name] : header;
+            },
 
-                    for (var option in actions[action]) {
-                        ('processors' === option ? processors : options)[option] = actions[action][option];
+            hasAllHeader: function(name) {
+                return name in this.getAllHeader();
+            },
+
+            getAllParam: function(name) {
+                var p, param = {}, actionParam = this.getParam(), serviceParam = this.getService().getParam();
+
+                for (p in actionParam) {
+                    param[p] = actionParam[p];
+                }
+                for (p in serviceParam) {
+                    param[p] = serviceParam[p];
+                }
+
+                return typeof name !== 'undefined' ? param[name] : param;
+            },
+
+            hasAllParam: function(name) {
+                return name in this.getAllParam();
+            },
+
+            getAllData: function(name) {
+                var d, data = {}, actionData = this.getData(), serviceData = this.getService().getData();
+
+                for (d in actionData) {
+                    data[d] = actionData[d];
+                }
+                for (d in serviceData) {
+                    data[d] = serviceData[d];
+                }
+
+                return typeof name !== 'undefined' ? data[name] : data;
+            },
+
+            hasAllData: function(name) {
+                return name in this.getAllData();
+            },
+
+            getAllProcessors: function(type) {
+                var processors = {}, serviceProcessors = this.getService().getProcessors(), actionProcessors = this.getProcessors(), typeProcessors, name, type;
+
+                for (type in ['pre', 'success', 'fail', 'post']) {
+                    typeProcessors = {};
+                    if (type in serviceProcessors) {
+                        for (name in serviceProcessors) {
+                            typeProcessors[name] = serviceProcessors[name];
+                        }
+                    }
+                    if (type in actionProcessors) {
+                        for (name in actionProcessors[type]) {
+                            typeProcessors[name] = actionProcessors[type][name];
+                        }
                     }
 
-                    service.setActions(action, {
-                        options:    options,
-                        processors: processors
-                    });
+                    for (name in typeProcessors) {
+                        processors[type] = typeProcessors;
+                        break;
+                    }
                 }
-            }
-        }
-    }
-});
-Clazz('Options', function() {
-    return {
-        methods: {
-            process: function(service, options) {
-                service.setOptions(options);
-            }
-        }
-    }
-});
-Clazz('Processors', function() {
-    return {
-        methods: {
-            process: function(service, processors) {
-                service.setProcessors(processors);
-            }
-        }
-    }
-});
 
-NameSpace.end();
+                return typeof type !== 'undefined' ? processors[type] : processors;
+            },
 
+            hasAllProcessors: function(type) {
+                return type in this.getAllProcessors();
+            },
+
+            getAllOption: function(name) {
+                var o, option = {}, actionOption = this.getOption(), serviceOption = this.getService().getOption();
+
+                for (o in actionOption) {
+                    option[o] = actionOption[o];
+                }
+                for (o in serviceOption) {
+                    option[o] = serviceOption[o];
+                }
+
+                return typeof name !== 'undefined' ? option[name] : option;
+            },
+
+            hasAllOption: function(name) {
+                return name in this.getOption();
+            },
+
+            getAjaxOptions: function() {
+                var options = this.getAllOption();
+
+                options.url     = this.getUrl();
+                options.type    = this.getMethod();
+                options.headers = this.getAllHeader();
+                options.data    = this.getAllData();
+                options.processData = false;
+
+                return options;
+            },
+
+            getUrl: function() {
+                var param, params = this.getAllParam(), queryString = [], url = '/'+this.getService().getBaseUrl()+'/'+this.getPath();
+
+                url = url.replace(/\/+/, '/');
+
+                for (param in params) {
+                    this.isParamInPath(param)
+                        ? url = url.replace('{'+param+'}', params[param])
+                        : queryString.push('param=' + params[param]);
+                }
+                queryString = queryString.join('&');
+
+                if (queryString) {
+                    if (-1 === url.search('?')) {
+                        url += '?';
+                    }
+                    else if ('&' !== url[url.length-1]) {
+                        url += '&';
+                    }
+                    url += queryString;
+                }
+
+                return url;
+            },
+
+            isParamInPath: function(name) {
+                return -1 !==this.getPath().search('{'+name+'}');
+            }
+        }
+    }
+})
+Meta.Manger.setProcessor('Actions', function(object, actions) {
+    for (var action in actions) {
+        object.setActionMeta(action, actions[action]);
+    }
+})
+Meta.Manager.setProcessor('BaseUrl', function(object, baseUrl) {
+    object.setBaseUrl(baseUrl);
+})
+Meta.Manager.setProcessor('Data', function(object, data) {
+    for (var name in data) {
+        object.setData(name, data[name]);
+    }
+})
+Meta.Manager.setProcessor('Headers', function(object, headers) {
+    for (var name in headers) {
+        object.setHeader(name, headers[name]);
+    }
+})
+Meta.Manager.setProcessor('Method', function(object, method) {
+    object.setMethod(method);
+})
+Meta.Manager.setProcessor('Options', function(object, options) {
+    for (var name in options) {
+        object.setOption(name, options[name]);
+    }
+})
+Meta.Manager.setProcessor('Params', function(object, params) {
+    for (var name in params) {
+        object.setParam(name, params[name]);
+    }
+})
+Meta.Manager.setProcessor('Path', function(object, path) {
+    object.setPath(path);
+})
+Meta.Manager.setProcessor('Processors', function(object, processors) {
+    for (var type in processors) {
+        object.setProcessor(type, processors[type]);
+    }
+})
 ;(function(global, Meta, Q, jQuery) {
 
-    var ActionClazz  = Clazz('Action',  [ Q, jQuery ]);
-    var ServiceClazz = Clazz('Service', [ ActionClazz ]);
+    var Action   = Clazz('Action',  [Q, jQuery]);
+    var Service  = Clazz('Service', [Action]);
+    var Factory  = Clazz('Factory', [Meta]);
+    var Api      = Clazz('Api');
 
-    var Factory = Clazz('Factory', [ ServiceClazz , Meta, {
-            options:    Clazz('MetaProcessors.Options').create(),
-            processors: Clazz('MetaProcessors.Processors').create(),
-            actions:    Clazz('MetaProcessors.Actions').create()
-        }]).create();
-    
-    var Api = Clazz('Api', [ Factory ]).create();
-
-    global.Api = Api;
+    global.api = Api.create({
+        factory: Factory.create({
+            serviceClazz: Service,
+            actionClazz:  Action
+        })
+    });
 
 })(global, Meta, Q, jQuery);
 

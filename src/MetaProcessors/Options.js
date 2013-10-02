@@ -1,9 +1,5 @@
-Clazz('Options', function() {
-    return {
-        methods: {
-            process: function(service, options) {
-                service.setOptions(options);
-            }
-        }
+Meta.Manager.setProcessor('Options', function(object, options) {
+    for (var name in options) {
+        object.setOption(name, options[name]);
     }
-});
+})

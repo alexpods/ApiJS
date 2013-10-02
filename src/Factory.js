@@ -1,39 +1,16 @@
-Clazz('Factory', function(Service, Meta, MetaOptions) {
+Clazz('ApiJS.Factory', function(Meta) {
     return {
-        constants: {
-            NAME_PATTERN: 'Api{UID}'
-        },
         properties: {
-            uid: {
-                default: 0
-            },
-            meta: {
-                default: new Meta(MetaOptions),
-                methods: ['get']
-            }
+            serviceClazz: ['object'],
+            actionClazz:  ['object']
         },
         methods: {
-            create: function(name, meta) {
-                if (typeof meta === 'undefined') {
-                    meta = name;
-                    name = null;
-                }
-                if (!name) {
-                    name = this.generateName();
-                }
-
-                var service = Service.create({ name: name });
-
-                if (typeof meta === 'function') {
-                    meta = meta.apply(service);
-                }
-                this._meta.process(service, meta);
-
-                return service;
+            createService: function(name, meta) {
+                return Meta.Manager.getHandler('ApiJS.Service').process(this.getServiceClazz({ name: name }).create(), meta);
             },
-            generateName: function() {
-                return this.clazz.const('NAME_PATTERN').replace('{UID}', ++this._uid);
+            createAction: function(name, meta) {
+                return Meta.Manager.getHandler('ApiJS.Action').process(this.getActionClazz().create({ name: name}), meta);
             }
         }
     }
-});
+})

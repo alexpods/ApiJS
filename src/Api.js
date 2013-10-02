@@ -1,34 +1,23 @@
-Clazz('Api', function(Factory) {
+Clazz('ApiJS.Api', function() {
     return {
         properties: {
-            service: {
-                type: 'hash',
-                methods: ['get', 'set', 'has']
-            },
-            meta: {
-                type: 'hash',
-                methods: ['get', 'set', 'has']
-            }
+            factory: ['object'],
+            service: ['hash']
         },
         methods: {
             service: function(name, meta) {
-                if (typeof meta === 'undefined') {
-                    return this.get(name);
-                }
+                if (typeof meta === 'undefined' || Object.prototype.toString.call(meta) === '[object Array]') {
 
-                this.setMeta(name, meta);
-                return this;
-            },
-            get: function(name) {
-                if (!this.hasService(name)) {
-                    var service = Factory.create(name, this.getMeta(name))
-                    this.setService(service.getName(), service);
+                    if (!this.hasService(name)) {
+                        this.setService(name, Service.create({
+                            api: this
+                        }));
+                    }
+                    return this.getService(name);
                 }
-                return this.getService(name);
-            },
-            has: function(name) {
-                return this.hasService(name) || this.hasMeta(name);
+                this.getFactory().setServiceClazz(name, meta);
+                return this;
             }
         }
     }
-});
+})
