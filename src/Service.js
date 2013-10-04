@@ -1,4 +1,4 @@
-Clazz('ApiJS.Service', function() {
+clazz('Service', function() {
     return {
         properties: {
             api:        ['object'],

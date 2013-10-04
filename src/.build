@@ -1,9 +1,9 @@
-;(function(global, Meta, Q, jQuery) {
+;(function(global, clazz, meta, Q, jQuery) {
 
-    var Action   = Clazz('Action',  [Q, jQuery]);
-    var Service  = Clazz('Service', [Action]);
-    var Factory  = Clazz('Factory', [Meta]);
-    var Api      = Clazz('Api');
+    var Action   = clazz('Action',  [Q, jQuery]);
+    var Service  = clazz('Service');
+    var Factory  = clazz('Factory', [meta]);
+    var Api      = clazz('Api');
 
     global.api = Api.create({
         factory: Factory.create({
@@ -12,4 +12,4 @@
         })
     });
 
-})(global, Meta, Q, jQuery);
+})(global, clazz, meta, Q, jQuery);

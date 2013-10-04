@@ -1,4 +1,4 @@
-Clazz('ApiJS.Api', function() {
+clazz('Api', function() {
     return {
         properties: {
             factory: ['object'],
@@ -9,13 +9,12 @@ Clazz('ApiJS.Api', function() {
                 if (typeof meta === 'undefined' || Object.prototype.toString.call(meta) === '[object Array]') {
 
                     if (!this.hasService(name)) {
-                        this.setService(name, Service.create({
-                            api: this
-                        }));
+                        this.setService(name, this.getFactory().createService(name, meta).setApi(this));
                     }
                     return this.getService(name);
                 }
                 this.getFactory().setServiceClazz(name, meta);
+
                 return this;
             }
         }

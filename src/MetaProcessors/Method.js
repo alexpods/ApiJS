@@ -1,3 +1,3 @@
-Meta.Manager.setProcessor('Method', function(object, method) {
+meta.processor('Api.Method', function(object, method) {
     object.setMethod(method);
 })

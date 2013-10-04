@@ -1,3 +1,3 @@
-Meta.Manager.setProcessor('Path', function(object, path) {
+meta.processor('Api.Path', function(object, path) {
     object.setPath(path);
 })

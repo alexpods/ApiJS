@@ -1,9 +1,9 @@
-;(function(global, Meta, Q, jQuery, undefined) {
+;(function(global, namespace, meta, Q, jQuery, undefined) {
 
-NameSpace('ApiJS');
+namespace('Api', function(namespace, clazz) { //namespace begin
 
 
-Clazz('ApiJS.Api', function() {
+clazz('Api', function() {
     return {
         properties: {
             factory: ['object'],
@@ -14,35 +14,44 @@ Clazz('ApiJS.Api', function() {
                 if (typeof meta === 'undefined' || Object.prototype.toString.call(meta) === '[object Array]') {
 
                     if (!this.hasService(name)) {
-                        this.setService(name, Service.create({
-                            api: this
-                        }));
+                        this.setService(name, this.getFactory().createService(name, meta).setApi(this));
                     }
                     return this.getService(name);
                 }
                 this.getFactory().setServiceClazz(name, meta);
+
                 return this;
             }
         }
     }
 })
-Clazz('ApiJS.Factory', function(Meta) {
+clazz('Factory', function(meta) {
     return {
+        constants: {
+            META: {
+                SERVICE: 'Api.Service',
+                ACTION:  'Api.Action'
+            }
+        },
         properties: {
             serviceClazz: ['object'],
             actionClazz:  ['object']
         },
         methods: {
-            createService: function(name, meta) {
-                return Meta.Manager.getHandler('ApiJS.Service').process(this.getServiceClazz({ name: name }).create(), meta);
+            createService: function(name, metaData) {
+                return meta
+                    .processor(this.clazz.const('META')('SERVICE'))
+                    .process(this.getServiceClazz().create({ name: name }), metaData);
             },
-            createAction: function(name, meta) {
-                return Meta.Manager.getHandler('ApiJS.Action').process(this.getActionClazz().create({ name: name}), meta);
+            createAction: function(name, metaData) {
+                return meta
+                    .processor(this.clazz.const('META')('ACTION'))
+                    .process(this.getActionClazz().create({ name: name}), metaData);
             }
         }
     }
 })
-Clazz('ApiJS.Service', function() {
+clazz('Service', function() {
     return {
         properties: {
             api:        ['object'],
@@ -62,7 +71,7 @@ Clazz('ApiJS.Service', function() {
         }
     }
 })
-Clazz('ApiJS.Action', function(Q, jQuery) {
+clazz('Action', function(Q, jQuery) {
     return {
         properties: {
             name:       ['string'],
@@ -249,51 +258,73 @@ Clazz('ApiJS.Action', function(Q, jQuery) {
         }
     }
 })
-Meta.Manger.setProcessor('Actions', function(object, actions) {
+meta.processor('Api.Action', 'Meta.Options', {
+    options: {
+        path:       'Api.Path',
+        method:     'Api.Method',
+        headers:    'Api.Headers',
+        params:     'Api.Params',
+        data:       'Api.Data',
+        options:    'Api.Options',
+        processors: 'Api.Processors'
+    }
+})
+meta.processor('Api.Actions', function(object, actions) {
     for (var action in actions) {
         object.setActionMeta(action, actions[action]);
     }
 })
-Meta.Manager.setProcessor('BaseUrl', function(object, baseUrl) {
+meta.processor('Api.BaseUrl', function(object, baseUrl) {
     object.setBaseUrl(baseUrl);
 })
-Meta.Manager.setProcessor('Data', function(object, data) {
+meta.processor('Api.Data', function(object, data) {
     for (var name in data) {
         object.setData(name, data[name]);
     }
 })
-Meta.Manager.setProcessor('Headers', function(object, headers) {
+meta.processor('Api.Headers', function(object, headers) {
     for (var name in headers) {
         object.setHeader(name, headers[name]);
     }
 })
-Meta.Manager.setProcessor('Method', function(object, method) {
+meta.processor('Api.Method', function(object, method) {
     object.setMethod(method);
 })
-Meta.Manager.setProcessor('Options', function(object, options) {
+meta.processor('Api.Options', function(object, options) {
     for (var name in options) {
         object.setOption(name, options[name]);
     }
 })
-Meta.Manager.setProcessor('Params', function(object, params) {
+meta.processor('Api.Params', function(object, params) {
     for (var name in params) {
         object.setParam(name, params[name]);
     }
 })
-Meta.Manager.setProcessor('Path', function(object, path) {
+meta.processor('Api.Path', function(object, path) {
     object.setPath(path);
 })
-Meta.Manager.setProcessor('Processors', function(object, processors) {
+meta.processor('Api.Processors', function(object, processors) {
     for (var type in processors) {
         object.setProcessor(type, processors[type]);
     }
 })
-;(function(global, Meta, Q, jQuery) {
+meta.processor('Api.Service', 'Meta.Options', {
+    options: {
+        baseUrl:    'Api.BaseUrl',
+        headers:    'Api.Headers',
+        params:     'Api.Params',
+        data:       'Api.Data',
+        options:    'Api.Options',
+        processors: 'Api.Processors',
+        actions:    'Api.Actions'
+    }
+})
+;(function(global, clazz, meta, Q, jQuery) {
 
-    var Action   = Clazz('Action',  [Q, jQuery]);
-    var Service  = Clazz('Service', [Action]);
-    var Factory  = Clazz('Factory', [Meta]);
-    var Api      = Clazz('Api');
+    var Action   = clazz('Action',  [Q, jQuery]);
+    var Service  = clazz('Service');
+    var Factory  = clazz('Factory', [meta]);
+    var Api      = clazz('Api');
 
     global.api = Api.create({
         factory: Factory.create({
@@ -302,8 +333,8 @@ Meta.Manager.setProcessor('Processors', function(object, processors) {
         })
     });
 
-})(global, Meta, Q, jQuery);
+})(global, clazz, meta, Q, jQuery);
 
-NameSpace.end();
+}); // namespace end
 
-})(this, Meta, Q, jQuery);
+})(this, namespace, meta, Q, jQuery);

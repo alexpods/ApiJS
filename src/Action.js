@@ -1,4 +1,4 @@
-Clazz('ApiJS.Action', function(Q, jQuery) {
+clazz('Action', function(Q, jQuery) {
     return {
         properties: {
             name:       ['string'],

@@ -1,4 +1,4 @@
-;(function(global, Meta, Q, jQuery, undefined) {
+;(function(global, namespace, meta, Q, jQuery, undefined) {
 
-NameSpace('ApiJS');
+namespace('Api', function(namespace, clazz) { //namespace begin
 

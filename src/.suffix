@@ -1,4 +1,4 @@
 
-NameSpace.end();
+}); // namespace end
 
-})(this, Meta, Q, jQuery);
+})(this, namespace, meta, Q, jQuery);
