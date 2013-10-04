@@ -34,8 +34,8 @@ clazz('Factory', function(meta) {
             }
         },
         properties: {
-            serviceClazz: ['object'],
-            actionClazz:  ['object']
+            serviceClazz: ['clazz'],
+            actionClazz:  ['clazz']
         },
         methods: {
             createService: function(name, metaData) {
