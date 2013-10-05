@@ -158,7 +158,7 @@ clazz('Action', function(Q, jQuery) {
             getUrl: function() {
                 var param, params = this.getAllParam(), queryString = [], url = '/'+this.getService().getBaseUrl()+'/'+this.getPath();
 
-                url = url.replace(/\/+/g, '/').replace(/^\/|\/$/g, '')
+                url = url.replace(/\/+/g, '/').replace(/:\//g, '://').greplace(/^\/|\/$/g, '')
 
                 for (param in params) {
                     this.isParamInPath(param)
