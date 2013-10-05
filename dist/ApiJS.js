@@ -137,7 +137,6 @@ clazz('Action', function(Q, jQuery) {
                         return self.process('pre');
                     })
                     .then(function() {
-                        self.checkRequest();
                         return Q.when(jQuery.ajax(self.getAjaxOptions()));
                     })
                     .then(function() {
