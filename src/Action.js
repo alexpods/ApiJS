@@ -151,6 +151,7 @@ clazz('Action', function(Q, jQuery) {
                 options.headers = this.getAllHeader();
                 options.data    = this.getAllData();
                 options.processData = false;
+                options.isLocal     = false;
 
                 return options;
             },
