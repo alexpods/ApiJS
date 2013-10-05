@@ -280,7 +280,7 @@ clazz('Action', function(Q, jQuery) {
                 for (param in params) {
                     this.isParamInPath(param)
                         ? url = url.replace('{'+param+'}', params[param])
-                        : queryString.push(param+'=' + params[param]);
+                        : queryString.push(param+'=' + encodeURIComponent(params[param]));
                 }
                 queryString = queryString.join('&');
 
