@@ -1,8 +1,7 @@
 clazz('Api', function() {
     return {
         properties: {
-            factory: ['object'],
-            service: ['name']
+            factory: ['object']
         },
         methods: {
             service: function(name, meta) {
