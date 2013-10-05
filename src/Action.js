@@ -152,6 +152,7 @@ clazz('Action', function(Q, jQuery) {
                 options.data    = this.getAllData();
                 options.processData = false;
                 options.isLocal     = false;
+                options.crossDomain = true;
 
                 return options;
             },
