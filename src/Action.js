@@ -158,17 +158,17 @@ clazz('Action', function(Q, jQuery) {
             getUrl: function() {
                 var param, params = this.getAllParam(), queryString = [], url = '/'+this.getService().getBaseUrl()+'/'+this.getPath();
 
-                url = url.replace(/\/+/, '/');
+                url = url.replace(/\/+/g, '/').replace(/^\/|\/$/g, '')
 
                 for (param in params) {
                     this.isParamInPath(param)
                         ? url = url.replace('{'+param+'}', params[param])
-                        : queryString.push('param=' + params[param]);
+                        : queryString.push(param+'=' + params[param]);
                 }
                 queryString = queryString.join('&');
 
                 if (queryString) {
-                    if (-1 === url.search('?')) {
+                    if (-1 === url.indexOf('?')) {
                         url += '?';
                     }
                     else if ('&' !== url[url.length-1]) {
