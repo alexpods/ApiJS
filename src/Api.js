@@ -2,19 +2,14 @@ clazz('Api', function() {
     return {
         properties: {
             factory: ['object'],
-            service: ['hash']
+            service: ['name']
         },
         methods: {
             service: function(name, meta) {
                 if (typeof meta === 'undefined' || Object.prototype.toString.call(meta) === '[object Array]') {
-
-                    if (!this.hasService(name)) {
-                        this.setService(name, this.getFactory().createService(name, meta).setApi(this));
-                    }
-                    return this.getService(name);
+                    return this.getFactory().createService(this, name, meta);
                 }
-                this.getFactory().setServiceClazz(name, meta);
-
+                this.getFactory().setServiceMeta(this, name, meta);
                 return this;
             }
         }

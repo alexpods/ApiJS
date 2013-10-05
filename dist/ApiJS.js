@@ -7,19 +7,14 @@ clazz('Api', function() {
     return {
         properties: {
             factory: ['object'],
-            service: ['hash']
+            service: ['name']
         },
         methods: {
             service: function(name, meta) {
                 if (typeof meta === 'undefined' || Object.prototype.toString.call(meta) === '[object Array]') {
-
-                    if (!this.hasService(name)) {
-                        this.setService(name, this.getFactory().createService(name, meta).setApi(this));
-                    }
-                    return this.getService(name);
+                    return this.getFactory().createService(this, name, meta);
                 }
-                this.getFactory().setServiceClazz(name, meta);
-
+                this.getFactory().setServiceMeta(this, name, meta);
                 return this;
             }
         }
@@ -35,22 +30,69 @@ clazz('Factory', function(meta) {
         },
         properties: {
             serviceClazz: ['clazz'],
-            actionClazz:  ['clazz']
+            actionClazz:  ['clazz'],
+
+            serviceMeta:  ['hash'],
+            actionMeta:   ['hash']
         },
         methods: {
-            createService: function(name, metaData) {
-                var service = this.getServiceClazz().create({ name: name });
+            createService: function(api, name, dependencies) {
+
+                var service  = this.getServiceClazz().create({ name: name , api: api});
+                var metaData = this.getServiceMeta(api, name);
+
+                if (typeof metaData === 'function') {
+                    metaData = metaData.apply(service, dependencies);
+                }
 
                 meta.processor(this.clazz.const('META')('SERVICE')).process(service, metaData);
 
                 return service;
             },
-            createAction: function(name, metaData) {
-                var action = this.getActionClazz().create({ name: name});
+            createAction: function(service, name, dependencies) {
+
+                var action   = this.getActionClazz().create({ name: name, service: service});
+                var metaData = this.getActionMeta(service, name);
+
+                if (typeof metaData === 'function') {
+                    metaData = metaData.apply(action, dependencies);
+                }
 
                 meta.processor(this.clazz.const('META')('ACTION')).process(action, metaData);
 
                 return action;
+            },
+
+            getServiceMeta: function(api, name) {
+                return this.__getPropertyValue('serviceMeta', this.getServiceMetaName(api, name));
+            },
+
+            setServiceMeta: function(api, name, meta) {
+                return this.__setPropertyValue('serviceMeta', this.getServiceMetaName(api, name), meta);
+            },
+
+            hasServiceMeta: function(api, name) {
+                return this.__hasPropertyValue('serviceMeta', this.getServiceMetaName(api, name));
+            },
+
+            getServiceMetaName: function(api, name) {
+                return 'Api'+api.uid + '___' + name;
+            },
+
+            getActionMeta: function(service, name) {
+               return this.__getPropertyValue('actionMeta', this.getActionMetaName(service, name));
+            },
+
+            setActionMeta: function(service, name, meta) {
+                return this.__setPropertyValue('actionMeta', this.getActionMetaName(service, name), meta);
+            },
+
+            hasActionMeta: function(service, name) {
+                return this.__hasPropertyValue('actionMeta', this.getActionMetaName(service, name));
+            },
+
+            getActionMetaName: function(service, actionName) {
+                return service.getName() + '___' + actionName;
             }
         }
     }
@@ -65,12 +107,11 @@ clazz('Service', function() {
             data:       ['hash'],
             param:      ['hash'],
             option:     ['hash'],
-            processors: ['hash', { keys: ['pre', 'success', 'fail', 'post']}],
-            actionMeta: ['hash']
+            processors: ['hash', { keys: ['pre', 'success', 'fail', 'post']}]
         },
         methods: {
-            action: function(name) {
-                return this.getApi().getFactory().createAction(name, this.getActionMeta(name)).setService(this);
+            action: function(name, dependencies) {
+                return this.getApi().getFactory().createAction(this, name, dependencies);
             }
         }
     }
@@ -273,9 +314,9 @@ meta.processor('Api.Action', 'Meta.Options', {
         processors: 'Api.Processors'
     }
 })
-meta.processor('Api.Actions', function(object, actions) {
+meta.processor('Api.Actions', function(service, actions) {
     for (var action in actions) {
-        object.setActionMeta(action, actions[action]);
+        service.getApi().getFactory().setActionMeta(service, action, actions[action]);
     }
 })
 meta.processor('Api.BaseUrl', function(object, baseUrl) {

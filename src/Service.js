@@ -8,12 +8,11 @@ clazz('Service', function() {
             data:       ['hash'],
             param:      ['hash'],
             option:     ['hash'],
-            processors: ['hash', { keys: ['pre', 'success', 'fail', 'post']}],
-            actionMeta: ['hash']
+            processors: ['hash', { keys: ['pre', 'success', 'fail', 'post']}]
         },
         methods: {
-            action: function(name) {
-                return this.getApi().getFactory().createAction(name, this.getActionMeta(name)).setService(this);
+            action: function(name, dependencies) {
+                return this.getApi().getFactory().createAction(this, name, dependencies);
             }
         }
     }
