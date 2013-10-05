@@ -97,23 +97,25 @@ clazz('Action', function(Q, jQuery) {
             },
 
             getAllProcessors: function(type) {
-                var processors = {}, serviceProcessors = this.getService().getProcessors(), actionProcessors = this.getProcessors(), typeProcessors, name, type;
+                var processors = {}, serviceProcessors = this.getService().getProcessors(), actionProcessors = this.getProcessors(), typeProcessors, name;
 
-                for (type in ['pre', 'success', 'fail', 'post']) {
+                var i, ii, types = ['pre', 'success', 'fail', 'post'];
+
+                for (i = 0, ii = types.length; i < ii; ++i) {
                     typeProcessors = {};
-                    if (type in serviceProcessors) {
+                    if (types[i] in serviceProcessors) {
                         for (name in serviceProcessors) {
                             typeProcessors[name] = serviceProcessors[name];
                         }
                     }
-                    if (type in actionProcessors) {
-                        for (name in actionProcessors[type]) {
-                            typeProcessors[name] = actionProcessors[type][name];
+                    if (types[i] in actionProcessors) {
+                        for (name in actionProcessors[types[i]]) {
+                            typeProcessors[name] = actionProcessors[types[i]][name];
                         }
                     }
 
                     for (name in typeProcessors) {
-                        processors[type] = typeProcessors;
+                        processors[types[i]] = typeProcessors;
                         break;
                     }
                 }
